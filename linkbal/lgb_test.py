@@ -132,8 +132,6 @@ action_type_dict = {
     3 : 2
 }
 
-dict_list = [prefecture_dict, gender_dict, payment_method_dict, interest_dict]
-
 ###########################################################
 # Reading tsv and merge them on 'user_id' and 'event_id'. #
 ###########################################################
@@ -156,14 +154,18 @@ gc.collect()
 # Replacing strings for int. #
 ##############################
 df_rp = df.copy()
-df_rp = df_rp.replace(dict)
+
+df_rp['prefecture_event'] = df_rp.prefecture_event.map(prefecture_dict)
+df_rp['prefecture_user'] = df_rp.prefecture_user.map(prefecture_dict)
+df_rp['gender'] = df_rp.gender.map(gender_dict)
+df_rp['payment_method'] = df_rp.payment_method.map(payment_method_dict)
+df_rp['interest'] = df_rp.interest.map(interest_dict)
 df_rp['action_type'] = df_rp.action_type.map(action_type_dict)
+
 df_rp = df_rp.fillna(9999)
 
 del df
 gc.collect()
-
-
 
 ######################################
 # Making datasets for train and test #
