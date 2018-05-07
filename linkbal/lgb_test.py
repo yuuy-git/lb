@@ -132,7 +132,7 @@ action_type_dict = {
     3 : 2
 }
 
-dict_list = [prefecture_dict, gender_dict, payment_method_dict, interest_dict, action_type_dict]
+dict_list = [prefecture_dict, gender_dict, payment_method_dict, interest_dict]
 
 ###########################################################
 # Reading tsv and merge them on 'user_id' and 'event_id'. #
@@ -155,36 +155,9 @@ gc.collect()
 ##############################
 # Replacing strings for int. #
 ##############################
-'''
-def replace_int(df,column):
-    #count elements
-    contents = df[column]
-    element = []
-    for content in contents:
-        if not content in element:
-            element.append(content)
-    #element 2 dictionaly {element0: 0, element1:1, ..., elementk: k}
-    dict_element = dict(zip(element,range(0,len(element))))
-    #change element to int
-    df = df.replace(dict_element)
-    return df,dict_element
-
-print('Replacing str for int in the csv')
-
-dict_ref = {}
-df_rp = df
-col_list = ['prefecture_event', 'payment_method', 'gender', 'interest']
-
-for cols in col_list:
-    df_rp, dict_ref[cols] = replace_int(df_rp, cols)
-
-df_rp = df_rp.replace('その他（海外等）', 47)
-'''
-
 df_rp = df.copy()
-for dict in dict_list:
-    df_rp = df_rp.replace(dict)
-
+df_rp = df_rp.replace(dict)
+df_rp['action_type'] = df_rp.action_type.map(action_type_dict)
 df_rp = df_rp.fillna(9999)
 
 del df
