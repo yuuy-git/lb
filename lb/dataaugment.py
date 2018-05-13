@@ -3,6 +3,17 @@
 import pandas as pd
 from pathlib import Path
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('start', type=int)
+parser.add_argument('end',type=int)
+args = parser.parse_args()
+
+start = args.start
+end = args.end
+
+
 ######################################
 # Setting paths, columns and dtypes. #
 ######################################
@@ -195,6 +206,9 @@ df_events['first_published_at'] = df_events['first_published_at'].where(
 ######################################################
 # Making log csv for each user with action_type = 0. #
 ######################################################
+# Edit df_users for parallel calculation
+df_users = df_users.iloc[start:end, :]
+
 # Making an event list
 event_list = pd.DataFrame()
 event_list['event_id'] = df_events.event_id
@@ -203,14 +217,13 @@ event_list['event_start_at'] = df_events.event_start_at
 for i, v in enumerate(df_users['user_id']):
     print("Making a log_csv for 'user_id' = {}".format(v))
     # Merging event_list and df_test_user whrere event_start_at > created_on
-    this_users_created_on = df_users.created_on[i]
+    this_users_created_on = df_users.created_on[i+start]
     df_index = pd.DataFrame()
     df_index = event_list
     log_user = df_log[df_log['user_id'] == v]
-    df_index = pd.merge(
-        df_index[event_list.event_start_at > this_users_created_on],
-        log_user[event_list.event_start_at > this_users_created_on],
-        on='event_id', how='left')
+    rule_a = df_index[event_list.event_start_at > this_users_created_on]
+    rule_b = df_log[log_user & df_log[event_list.event_start_at > this_users_created_on]]
+    df_index = pd.merge(rule_a, rule_b, on='event_id', how='left')
 
     # Droping log.tsv's info and fill action_type=NaN with 0
     df_index = df_index.drop(['event_start_at', 'time_stamp', 'num_of_people',
